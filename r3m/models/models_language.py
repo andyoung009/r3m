@@ -34,6 +34,8 @@ class LangEncoder(nn.Module):
       lang_embedding = lang_embedding.mean(1)
     return lang_embedding
 
+# The language prediction head is implemented as an 5 layer MLP with sizes [2*E + L, 1024, 1024, 1024, 1024] and output a scalar score, 
+# where E is the output dimension of Fφ and L is the output dimension of the DistilBERT [71] sentence encoder (768) from HuggingFace transformers.
 class LanguageReward(nn.Module):
     def __init__(self, ltype, im_dim, hidden_dim, lang_dim, simfunc=None):
         super().__init__()

@@ -3,3 +3,7 @@ __pycache__/
 .nfs*
 *.ipynb*
 *.egg*
+mjrl/
+mujoco-py/
+r3moutput/
+robohive/

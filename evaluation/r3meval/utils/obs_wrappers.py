@@ -155,6 +155,7 @@ class StateEmbedding(gym.ObservationWrapper):
             emb = self.embedding(inp).view(-1, self.embedding_dim)
         else:
             with torch.no_grad():
+                # 通过Resnet embeddding层对输入数据进行高度压缩的表示,获得该输入数据的低维浓缩表示emb
                 emb =  self.embedding(inp).view(-1, self.embedding_dim).to('cpu').numpy().squeeze()
         return emb
 

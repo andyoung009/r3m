@@ -49,6 +49,7 @@ class BC:
             self.set_variance_with_data(out_scale)
 
         # construct optimizer
+        # 参数包括策略网络（MLP）以及encoder_params（resnet特征编码网络），当开启train()模式时即要微调特征网络
         self.optimizer = torch.optim.Adam(list(self.policy.trainable_params) + list(encoder_params), lr=lr) if optimizer is None else optimizer
 
         # Loss criterion if required
@@ -129,6 +130,7 @@ class BC:
     def fit(self, data, suppress_fit_tqdm=False, **kwargs):
         # data is a dict
         # keys should have "observations" and "expert_actions"
+        # 此处参数包括
         validate_keys = all([k in data.keys() for k in ["observations", "expert_actions"]])
         assert validate_keys is True
         ts = timer.time()
@@ -140,10 +142,12 @@ class BC:
             self.logger.log_kv('loss_before', loss_val)
 
         # train loop
+        # 实际的反向传播环节在这里，隐藏太深了
         for ep in config_tqdm(range(self.epochs), suppress_fit_tqdm):
             for mb in range(int(num_samples / self.mb_size)):
                 rand_idx = np.random.choice(num_samples, size=self.mb_size)
                 self.optimizer.zero_grad()
+                # 计算损失
                 loss = self.loss(data, idx=rand_idx)
                 loss.backward()
                 self.optimizer.step()
@@ -168,6 +172,7 @@ class BC:
 
         ## Extract images
         if pixel:
+            # 将来自expert路径字典的所有"images" 数组拼接成一个observations数组
             observations = np.concatenate([path["images"] for path in self.expert_paths])
         else:
             observations = np.concatenate([path["observations"] for path in self.expert_paths])
@@ -175,6 +180,7 @@ class BC:
         ## Extract actions
         expert_actions = np.concatenate([path["actions"] for path in self.expert_paths])
         data = dict(observations=observations, proprio=proprio, expert_actions=expert_actions)
+        # fit 中包含训练部分
         self.fit(data, **kwargs)
 
 

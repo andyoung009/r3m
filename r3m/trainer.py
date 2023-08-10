@@ -158,5 +158,5 @@ class Trainer():
             model.module.encoder_opt.step()
 
         t7 = time.time()
-        st = f"Load time {t1-t0}, Batch time {t2-t1}, Encode and LP tine {t3-t2}, Lang time {t5-t3}, TCN time {t6-t5}, Backprop time {t7-t6}"
+        st = f"Load time {t1-t0}, Batch time {t2-t1}, Encode and LP time {t3-t2}, Lang time {t5-t3}, TCN time {t6-t5}, Backprop time {t7-t6}"
         return metrics, st

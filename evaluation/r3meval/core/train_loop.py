@@ -14,6 +14,7 @@ import mj_envs, gym
 import numpy as np, time as timer, multiprocessing, pickle, os
 import os
 from collections import namedtuple
+import pdb
 
 
 import metaworld
@@ -48,7 +49,7 @@ def env_constructor(env_name, device='cuda', image_width=256, image_height=256,
         assert(False)
     return e
 
-
+# 创建并配置一个行为克隆（Behavior Cloning）Agent
 def make_bc_agent(env_kwargs:dict, bc_kwargs:dict, demo_paths:list, epochs:int, seed:int, pixel_based=True):
     ## Creates environment
     e = env_constructor(**env_kwargs)
@@ -96,7 +97,10 @@ def bc_train_loop(job_data:dict) -> None:
 
     # Infers the location of the demos
     ## V2 is metaworld, V0 adroit, V3 kitchen
-    data_dir = '/iris/u/surajn/data/r3m/'
+    ## change the dir on 2023-07-29
+    #data_dir = '/iris/u/surajn/data/r3m/'
+    data_dir = '/data/ML_document/datasets/r3m_demonstrations/bc_data_clean/'
+	
     if "v2" in job_data['env_kwargs']['env_name']:
         demo_paths_loc = data_dir + 'final_paths_multiview_meta_200/' + job_data['camera'] + '/' + job_data['env_kwargs']['env_name'] + '.pickle'
     elif "v0" in job_data['env_kwargs']['env_name']:
@@ -108,6 +112,7 @@ def bc_train_loop(job_data:dict) -> None:
     demo_paths = pickle.load(open(demo_paths_loc, 'rb'))
     demo_paths = demo_paths[:job_data['num_demos']]
     print(len(demo_paths))
+    # pdb.set_trace()
     demo_score = np.mean([np.sum(p['rewards']) for p in demo_paths])
     print("Demonstration score : %.2f " % demo_score)
 
@@ -138,6 +143,7 @@ def bc_train_loop(job_data:dict) -> None:
             if last_step > (job_data['steps'] / 4.0):
                 e.env.embedding.train()
                 e.env.start_finetuning()
+        # agent.train中fit包含了反向传播训练代码
         agent.train(job_data['pixel_based'], suppress_fit_tqdm=True, step = last_step)
         
         # perform evaluation rollouts every few epochs
@@ -152,7 +158,10 @@ def bc_train_loop(job_data:dict) -> None:
             
             try:
                 ## Success computation and logging for Adroit and Kitchen
+                # e print show '<mj_envs.envs.relay_kitchen.kitchen_multitask_v2.KitchenFrankaRandomDesk object at 0x7f46e6c247d0>'
+                # evaluate_success位于'/data/ML_document/r3m/robohive/mj_envs/env_base.py' L224-L248
                 success_percentage = e.env.unwrapped.evaluate_success(paths)
+                pdb.set_trace()
                 for i, path in enumerate(paths):
                     if (i < 10) and job_data['pixel_based']:
                         vid = path['images']

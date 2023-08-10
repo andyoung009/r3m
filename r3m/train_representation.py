@@ -129,6 +129,7 @@ class Workspace:
         sdict["global_step"] = self._global_step
         torch.save(sdict, global_snapshot)
 
+# 加载训练过程中保存的模型快照。它接收一个 snapshot_path 参数，表示要加载的模型快照的路径
     def load_snapshot(self, snapshot_path):
         payload = torch.load(snapshot_path)
         self.model.load_state_dict(payload['r3m'])

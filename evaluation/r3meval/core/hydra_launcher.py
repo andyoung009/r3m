@@ -8,7 +8,12 @@ import time as timer
 import hydra
 import multiprocessing
 from omegaconf import DictConfig, OmegaConf
+
+import sys
+sys.path.append('/data/ML_document/r3m/evaluation')
+print(sys.path)
 from train_loop import bc_train_loop
+# import train_loop
 
 cwd = os.getcwd()
 
@@ -33,4 +38,6 @@ def configure_jobs(job_data:dict) -> None:
 
 if __name__ == "__main__":
     multiprocessing.set_start_method('spawn')
+    # job_data的数据由运行程序时所传递的参数+hydra/laucher和hydra/local中的参数共同决定
+    # 运行程序时已经生成到了/data/ML_document/r3m/evaluation/outputs/BC_pretrained_rep/2023-07-30_04-50-08/job_config.json
     configure_jobs()

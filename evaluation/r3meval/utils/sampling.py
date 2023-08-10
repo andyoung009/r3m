@@ -18,6 +18,7 @@ from metaworld.envs import (ALL_V2_ENVIRONMENTS_GOAL_OBSERVABLE,
 
 
 # Single core rollout to sample trajectories
+# 代码用于使用给定策略在指定环境中执行多个轨迹，并返回每个轨迹的相关数据
 # =======================================================
 def do_rollout(
         num_traj,
@@ -40,7 +41,7 @@ def do_rollout(
     """
     # get the correct env behavior
     print("Evaluating")
-    if type(env) == str:
+    if type(env) == str: # False
         ## MetaWorld specific stuff
         if "v2" in env:
             env_name = env
@@ -54,9 +55,9 @@ def do_rollout(
             env.spec.max_episode_steps = 500
         else:
             env = GymEnv(env)
-    elif isinstance(env, GymEnv):
+    elif isinstance(env, GymEnv): # True
         env = env
-    elif callable(env):
+    elif callable(env): # False
         env = env(**env_kwargs)
     else:
         # print("Unsupported environment format")
@@ -76,6 +77,7 @@ def do_rollout(
     paths = []
 
     ep = 0
+    # 利用策略网络生成轨迹的部分
     while ep < num_traj:
         # seeding
         if base_seed is not None:
@@ -109,12 +111,17 @@ def do_rollout(
             init_state = env.get_env_state()
 
         while t < horizon and done != True:
+            # 使用策略policy选择动作,gaussian_mlp.py L95-L101
             a, agent_info = policy.get_action(o)
+            # 如果eval_mode为True，则使用评估模式选择的动作
             if eval_mode:
                 a = agent_info['evaluation']
 
+            # 执行选定的动作，获取下一个观测值、奖励和环境信息
+            # gym_env.py Line97-Line107, 实际上调用嵌套很多次的step()函数，很复杂
             next_o, r, done, env_info_step = env.step(a)
             env_info = env_info_step #if env_info_base == {} else env_info_base
+            # 将观测值、动作、奖励、策略信息和环境信息添加到相应的列表
             observations.append(o)
             actions.append(a)
             rewards.append(r)
